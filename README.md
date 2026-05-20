@@ -11,3 +11,5 @@ The Basic Overview is I modified the internal air deflector to keep the CPU, Ram
 Powering the GPU I purchased custom Nvidia P100 8 pin to dual 8pin PCIe power plugs, and custom Dell 10 pin power rail to to dual 8 pin PCIe plugs to split the current accross 2 wires instead on just 1. 
 
 The 7920 has 4 power rail 10 pin plugs capable of 300w each in power delivery, a 1450w power supply, and can take Dual Xeon Gen 1 & Gen 2 processors and up to 3Tb of EEC DDR4 ram. 
+
+![alt text](image.png)
