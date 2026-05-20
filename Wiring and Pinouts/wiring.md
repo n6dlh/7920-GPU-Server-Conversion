@@ -50,4 +50,5 @@ Tach line ──[1kΩ]── GPIO
               GND
 
 
-  Pictures/850ea237-0c0e-4642-ad78-ad19676d258b.png            
+
+![alt text](../Pictures/850ea237-0c0e-4642-ad78-ad19676d258b.png)
