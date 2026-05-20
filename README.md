@@ -13,3 +13,16 @@ Powering the GPU I purchased custom Nvidia P100 8 pin to dual 8pin PCIe power pl
 The 7920 has 4 power rail 10 pin plugs capable of 300w each in power delivery, a 1450w power supply, and can take Dual Xeon Gen 1 & Gen 2 processors and up to 3Tb of EEC DDR4 ram. 
 
 ![alt text](Pictures/IMG_4540.jpg)
+
+![alt text](image1.png)
+
+I am running Proxmox on the machine,and passing the Nvidia GPU to a VM. In the VM I have ollama.cpp running with Open Webui and Hermes agent running. I also have the Hermes Telegram plugin running 
+![alt text](<Pictures/Screenshot 2026-05-20 113242.png>)
+
+![alt text](<Pictures/Screenshot 2026-05-20 113331.png>)
+
+![alt text](<Pictures/Screenshot 2026-05-20 113520.png>)
+
+![alt text](<Pictures/Screenshot 2026-05-20 114214.png>)
+
+This is an NVTOP running qwen2.5-14b queried in Open Web UI and loading the model to memory and answering, I have it set to unload the model when it has not been queried in a minute, this is able to spread the model over the Vram of multiple GPUs and works very well. 
