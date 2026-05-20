@@ -1,0 +1,352 @@
+esphome:
+  name: server-fan-controller
+  friendly_name: Server Fan Controller
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: ""
+
+ota:
+  - platform: esphome
+    password: "673f6"
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Server-Fan-Controller"
+    password: ""
+
+captive_portal:
+
+web_server:
+
+# ---------------------------
+# 1-Wire bus for DS18B20s
+# ---------------------------
+one_wire:
+  - platform: gpio
+    pin: GPIO4
+
+# ---------------------------
+# Dallas temperature sensors
+# Replace address values after first discovery boot
+# ---------------------------
+sensor:
+  - platform: dallas_temp
+    address: 
+    name: "GPU 1 Temperature"
+    id: gpu1_temp
+    update_interval: 5s
+    device_class: temperature
+    state_class: measurement
+    unit_of_measurement: "°C"
+
+  - platform: dallas_temp
+    address: 
+    name: "GPU 2 Temperature"
+    id: gpu2_temp
+    update_interval: 5s
+    device_class: temperature
+    state_class: measurement
+    unit_of_measurement: "°C"
+
+  # ---------------------------
+  # Tach pulse counters
+  # Use ONE tach signal per bank
+  # ---------------------------
+  - platform: pulse_counter
+    pin:
+      number: GPIO25
+      mode:
+        input: true
+        pullup: true
+    name: "GPU 1 Tach Raw"
+    id: gpu1_tach_raw
+    update_interval: 5s
+    unit_of_measurement: "pulses/min"
+    accuracy_decimals: 0
+    entity_category: diagnostic
+    count_mode:
+      rising_edge: INCREMENT
+      falling_edge: DISABLE
+
+  - platform: pulse_counter
+    pin:
+      number: GPIO26
+      mode:
+        input: true
+        pullup: true
+    name: "GPU 2 Tach Raw"
+    id: gpu2_tach_raw
+    update_interval: 5s
+    unit_of_measurement: "pulses/min"
+    accuracy_decimals: 0
+    entity_category: diagnostic
+    count_mode:
+      rising_edge: INCREMENT
+      falling_edge: DISABLE
+
+  # ---------------------------
+  # RPM sensors
+  # Most PC fans output 2 pulses/rev
+  # ---------------------------
+  - platform: template
+    name: "GPU 1 Fan RPM"
+    id: gpu1_rpm
+    lambda: |-
+      return id(gpu1_tach_raw).state / 2.0;
+    update_interval: 5s
+    unit_of_measurement: "rpm"
+    accuracy_decimals: 0
+    icon: mdi:fan
+    state_class: measurement
+    entity_category: diagnostic
+
+  - platform: template
+    name: "GPU 2 Fan RPM"
+    id: gpu2_rpm
+    lambda: |-
+      return id(gpu2_tach_raw).state / 2.0;
+    update_interval: 5s
+    unit_of_measurement: "rpm"
+    accuracy_decimals: 0
+    icon: mdi:fan
+    state_class: measurement
+    entity_category: diagnostic
+
+  # ---------------------------
+  # Calculated duty % for HA display
+  # ---------------------------
+  - platform: template
+    name: "GPU 1 Fan Duty"
+    id: gpu1_duty_pct
+    lambda: |-
+      return id(gpu1_last_speed) * 100.0;
+    update_interval: 5s
+    unit_of_measurement: "%"
+    accuracy_decimals: 0
+    icon: mdi:speedometer
+
+  - platform: template
+    name: "GPU 2 Fan Duty"
+    id: gpu2_duty_pct
+    lambda: |-
+      return id(gpu2_last_speed) * 100.0;
+    update_interval: 5s
+    unit_of_measurement: "%"
+    accuracy_decimals: 0
+    icon: mdi:speedometer
+
+# ---------------------------
+# PWM outputs for each fan bank
+# 25kHz is appropriate for 4-wire fan PWM
+# ---------------------------
+output:
+  - platform: ledc
+    pin: GPIO18
+    id: gpu1_pwm
+    frequency: 25000 Hz
+
+  - platform: ledc
+    pin: GPIO19
+    id: gpu2_pwm
+    frequency: 25000 Hz
+
+# ---------------------------
+# Fan entities in Home Assistant
+# ---------------------------
+fan:
+  - platform: speed
+    output: gpu1_pwm
+    name: "GPU 1 Fan Bank"
+    id: gpu1_fan
+
+  - platform: speed
+    output: gpu2_pwm
+    name: "GPU 2 Fan Bank"
+    id: gpu2_fan
+
+# ---------------------------
+# Helpers / tuning controls
+# These show up nicely in HA
+# ---------------------------
+number:
+  - platform: template
+    name: "GPU 1 Target Temp"
+    id: gpu1_target_temp
+    min_value: 25
+    max_value: 85
+    step: 1
+    initial_value: 45
+    optimistic: true
+    restore_value: true
+    unit_of_measurement: "°C"
+    icon: mdi:target
+
+  - platform: template
+    name: "GPU 2 Target Temp"
+    id: gpu2_target_temp
+    min_value: 25
+    max_value: 85
+    step: 1
+    initial_value: 45
+    optimistic: true
+    restore_value: true
+    unit_of_measurement: "°C"
+    icon: mdi:target
+
+  - platform: template
+    name: "GPU 1 Minimum Fan"
+    id: gpu1_min_speed
+    min_value: 20
+    max_value: 80
+    step: 1
+    initial_value: 30
+    optimistic: true
+    restore_value: true
+    unit_of_measurement: "%"
+    icon: mdi:fan-chevron-down
+
+  - platform: template
+    name: "GPU 2 Minimum Fan"
+    id: gpu2_min_speed
+    min_value: 20
+    max_value: 80
+    step: 1
+    initial_value: 30
+    optimistic: true
+    restore_value: true
+    unit_of_measurement: "%"
+    icon: mdi:fan-chevron-down
+
+  - platform: template
+    name: "GPU 1 Full Speed Temp"
+    id: gpu1_full_temp
+    min_value: 35
+    max_value: 95
+    step: 1
+    initial_value: 65
+    optimistic: true
+    restore_value: true
+    unit_of_measurement: "°C"
+    icon: mdi:thermometer-high
+
+  - platform: template
+    name: "GPU 2 Full Speed Temp"
+    id: gpu2_full_temp
+    min_value: 35
+    max_value: 95
+    step: 1
+    initial_value: 65
+    optimistic: true
+    restore_value: true
+    unit_of_measurement: "°C"
+    icon: mdi:thermometer-high
+
+# ---------------------------
+# Enable/disable automatic control
+# ---------------------------
+switch:
+  - platform: template
+    name: "GPU 1 Auto Control"
+    id: gpu1_auto
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_ON
+    entity_category: config
+
+  - platform: template
+    name: "GPU 2 Auto Control"
+    id: gpu2_auto
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_ON
+    entity_category: config
+
+# ---------------------------
+# Internal globals to store current duty
+# ---------------------------
+globals:
+  - id: gpu1_last_speed
+    type: float
+    restore_value: no
+    initial_value: '0.30'
+
+  - id: gpu2_last_speed
+    type: float
+    restore_value: no
+    initial_value: '0.30'
+
+# ---------------------------
+# Main control loop
+# ---------------------------
+interval:
+  - interval: 5s
+    then:
+      - lambda: |-
+          auto calc_speed = [](float temp, float min_pct, float target, float full_temp) -> float {
+            if (isnan(temp)) {
+              return min_pct / 100.0f;
+            }
+
+            if (full_temp <= target) {
+              full_temp = target + 5.0f;
+            }
+
+            float min_speed = min_pct / 100.0f;
+
+            if (temp <= target) {
+              return min_speed;
+            }
+
+            if (temp >= full_temp) {
+              return 1.0f;
+            }
+
+            float ratio = (temp - target) / (full_temp - target);
+            return min_speed + ratio * (1.0f - min_speed);
+          };
+
+          if (id(gpu1_auto).state) {
+            float s1 = calc_speed(
+              id(gpu1_temp).state,
+              id(gpu1_min_speed).state,
+              id(gpu1_target_temp).state,
+              id(gpu1_full_temp).state
+            );
+
+            id(gpu1_last_speed) = s1;
+            id(gpu1_pwm).set_level(s1);
+          }
+
+          if (id(gpu2_auto).state) {
+            float s2 = calc_speed(
+              id(gpu2_temp).state,
+              id(gpu2_min_speed).state,
+              id(gpu2_target_temp).state,
+              id(gpu2_full_temp).state
+            );
+
+            id(gpu2_last_speed) = s2;
+            id(gpu2_pwm).set_level(s2);
+          }
+
+binary_sensor:
+  - platform: status
+    name: "GPU Fan Controller Status"
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: "GPU Fan Controller IP"
+      entity_category: diagnostic
