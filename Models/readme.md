@@ -1,0 +1,1 @@
+I will have a link soon to Printables that will link back here for the entire build. I have uploaded the STL file and the 3mf in case anyone wants to make changes, if you make some cool changes hit me up and let me know, would be happy to add anything here an link to your repo and printables
