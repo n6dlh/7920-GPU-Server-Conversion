@@ -42,6 +42,7 @@ run this
 nvflash64 --gpumode graphics 
 
 If that completes without errors you can run the list mode again to validate the graphics is enabled. 
+
 ![alt text](Pictures/11_large-v1761048783.png)
 
 The next challenge is keeping the Proxmox driver from loading so you can pass the gpu through to the VM. I will touch on that in the future, I have to go through setting that up again, but there are videos on how to set it up. Next is in the VM you have to download the Nvidia 535 driver, tools, adn Cuda to get it all working.
