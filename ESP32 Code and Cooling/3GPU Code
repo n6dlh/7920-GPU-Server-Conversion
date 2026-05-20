@@ -16,18 +16,18 @@ logger:
 
 api:
   encryption:
-    key: "GbgyKWxp990EejWAN7krkoIf/LZseiAmO9Qy8wLY2dc="
+    key: ""
 
 ota:
   - platform: esphome
-    password: "25c83dd21a2c0a9c27f674ba4e3673f6"
+    password: ""
 
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
   ap:
     ssid: "Server-Fan-Controller"
-    password: "P3O6c7xXsqa9"
+    password: ""
 
 captive_portal:
 web_server:
