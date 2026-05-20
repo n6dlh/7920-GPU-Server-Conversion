@@ -46,3 +46,5 @@ If that completes without errors you can run the list mode again to validate the
 ![alt text](Pictures/11_large-v1761048783.png)
 
 The next challenge is keeping the Proxmox driver from loading so you can pass the gpu through to the VM. I will touch on that in the future, I have to go through setting that up again, but there are videos on how to set it up. Next is in the VM you have to download the Nvidia 535 driver, tools, adn Cuda to get it all working.
+
+One thing to keep in mind is there is only 4 X16 PCIe lanes in the T7920. For a single CPU slot 2&4 are the X16 Slots. If using 2 cpus you can use slots 6&7 as X16 slots. In the end with this I am using slots 2 and 7 currently, and plan to add another P100 to slot 4. I already have it and just need to change the code to the ESP and drop it in. 
