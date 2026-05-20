@@ -17,6 +17,8 @@ The 7920 has 4 power rail 10 pin plugs capable of 300w each in power delivery, a
 ![alt text](Pictures/image1.png)
 
 I am running Proxmox on the machine,and passing the Nvidia GPU to a VM. In the VM I have ollama.cpp running with Open Webui and Hermes agent running. I also have the Hermes Telegram plugin running 
+
+
 ![alt text](<Pictures/Screenshot 2026-05-20 113242.png>)
 
 ![alt text](<Pictures/Screenshot 2026-05-20 113331.png>)
