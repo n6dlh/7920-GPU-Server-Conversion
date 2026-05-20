@@ -26,3 +26,19 @@ I am running Proxmox on the machine,and passing the Nvidia GPU to a VM. In the V
 ![alt text](<Pictures/Screenshot 2026-05-20 114214.png>)
 
 This is an NVTOP running qwen2.5-14b queried in Open Web UI and loading the model to memory and answering, I have it set to unload the model when it has not been queried in a minute, this is able to spread the model over the Vram of multiple GPUs and works very well. 
+
+One of the biggest challenges to getting the Dell Bios to see the cards at all and getting it to boot. Throwing the card in and powering on will not work. The Bar address of the PCIE on these cards are huge. For the dell you have to enable read addresses over 4GB on the PCIE and shut off some of the Intel PCIE setting. Also you will need a windows computer that can boot with the cards and see them. Download [NVflash from GPUZ](https://www.techpowerup.com/download/nvidia-nvflash/) and make sure that the card is being seen by the computer. Unzip the folder and then open a command prompt as Adminastrater. Move into the folder where the NVflash64 file is and backup the flash. When in command prompt run nvflash64 --save backupbios.rom
+
+Once that is done run the command
+
+nvflash64 --listgpumodes
+
+It should come back showing Compute if that is the case you will need to set it to display mode, this only changes the how the bios sees the card, it does not limit the ability to use the vram, it will set the bar size to 256mb for the boot portion, once the driver loads the card will be able to be fully utilized. 
+
+run this
+
+nvflash64 --gpumode graphics 
+
+If that completes without errors you can run the list mode again to validate the graphics is enabled. 
+![alt text](Pictures/11_large-v1761048783.png)
+
