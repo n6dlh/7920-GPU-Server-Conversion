@@ -1,10 +1,14 @@
 This code is setup for ESP Home to run on home assistant and can be vide coded to use as a standard ESP32 using IDE. 
 
-This has its own webpage and then integrades into HAOS, and was programmed and setup on ESPhome plugin on HAOS![alt text](image.png)![alt text](image-1.png)![alt text](image-2.png)
+The updated code will scale up to 3 GPU, it will use the Gpu_bank.yaml to pull the information in when compiling. Use Studio Code Server on HAOS and drop the files into the ESPhome folder. You will see the new files in the ESP Home on HAOS. Use the initial flash to the ESP to copy the encryution and password information, and pull the dallas sensor addresses from the logs off the initial flash, then validate the code. 
+![alt text](/ESP32%20Code%20and%20Cooling/images/logs.png)
+
+
+This has its own webpage and then integrades into HAOS, and was programmed and setup on ESPhome plugin on HAOS![alt text](/ESP32%20Code%20and%20Cooling/images/image.png)![alt text](/ESP32%20Code%20and%20Cooling/images/image-1.png)![alt text](/ESP32%20Code%20and%20Cooling/images/image-2.png)
 
 Here is the webpage:
 
-![alt text](image-3.png)
+![alt text](/ESP32%20Code%20and%20Cooling/images/image-3.png)
 
 The logs show in real time and can also be checked in ESPhome, supports OTA updates and programming once it is programmed over USB. 
 The Dallas sensors are single pin addressed, so that will need to be set for each fan bank. An initial base program is done to setup the ESPhome and the first part of the code
@@ -22,6 +26,6 @@ For the ESP32 I used a standard ESP on a dev board https://www.amazon.com/dp/B0C
 For the PWM and Tach signals I made a breadboard for them and 3D printed a case for it. I used this to add the dropping resistors and the capacitors for noise. 
 
 The 3D printed fan mount I used for the P100 is located here. https://www.printables.com/model/100708-p100-40mm-fan-mount/files
-![alt text](image-5.png)
+![alt text](/ESP32%20Code%20and%20Cooling/images/image-5.png)
 
 The designer used quad fans but they are overkill with the controller I made. It allows you to set the fan ramping PID loop to whatever you need to keep them cool, I have run them very hard and since setting the PID loop they never get over 55C. 

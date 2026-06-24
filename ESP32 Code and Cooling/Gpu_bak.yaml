@@ -1,0 +1,143 @@
+# ---------------------------------------------------------------
+# Reusable per-GPU fan bank.
+# Included once per GPU from the main config via packages + vars.
+# Every id/name is templated off ${gpu_id} / ${gpu_name} so the
+# three instances never collide.
+# ---------------------------------------------------------------
+
+substitutions:
+  # Defaults (overridden by vars: in the main file's package include)
+  gpu_id: gpu1
+  gpu_name: "GPU 1"
+  pwm_pin: GPIO18
+  tach_pin: GPIO25
+  temp_address: "0x0000000000000000"
+
+sensor:
+  # ---- DS18B20 temp on the shared 1-Wire bus (bus is defined in main) ----
+  - platform: dallas_temp
+    address: ${temp_address}
+    name: "${gpu_name} Temperature"
+    id: ${gpu_id}_temp
+    update_interval: 5s
+    device_class: temperature
+    state_class: measurement
+    unit_of_measurement: "°C"
+
+  # ---- Tach: read ONE fan per bank. 100us filter rejects noise. ----
+  # HW NOTE: prefer an external 10k pull-up to 3.3V (NOT 12V) on this line.
+  - platform: pulse_counter
+    pin:
+      number: ${tach_pin}
+      mode:
+        input: true
+        pullup: true
+    name: "${gpu_name} Tach Raw"
+    id: ${gpu_id}_tach_raw
+    update_interval: 5s
+    unit_of_measurement: "pulses/min"
+    accuracy_decimals: 0
+    entity_category: diagnostic
+    internal_filter: 100us
+    count_mode:
+      rising_edge: INCREMENT
+      falling_edge: DISABLE
+
+  # ---- RPM (2 pulses/rev) ----
+  - platform: template
+    name: "${gpu_name} Fan RPM"
+    id: ${gpu_id}_rpm
+    lambda: 'return id(${gpu_id}_tach_raw).state / 2.0;'
+    update_interval: 5s
+    unit_of_measurement: "rpm"
+    accuracy_decimals: 0
+    icon: mdi:fan
+    state_class: measurement
+    entity_category: diagnostic
+
+  # ---- Duty % for HA display ----
+  - platform: template
+    name: "${gpu_name} Fan Duty"
+    id: ${gpu_id}_duty_pct
+    lambda: 'return id(${gpu_id}_last_speed) * 100.0;'
+    update_interval: 5s
+    unit_of_measurement: "%"
+    accuracy_decimals: 0
+    icon: mdi:speedometer
+
+# ---- 25kHz PWM output, driven directly by the control loop ----
+output:
+  - platform: ledc
+    pin: ${pwm_pin}
+    id: ${gpu_id}_pwm
+    frequency: 25000 Hz
+
+# ---- Tuning controls ----
+number:
+  - platform: template
+    name: "${gpu_name} Target Temp"
+    id: ${gpu_id}_target_temp
+    min_value: 25
+    max_value: 85
+    step: 1
+    initial_value: 45
+    optimistic: true
+    restore_value: true
+    unit_of_measurement: "°C"
+    icon: mdi:target
+
+  - platform: template
+    name: "${gpu_name} Minimum Fan"
+    id: ${gpu_id}_min_speed
+    min_value: 20
+    max_value: 80
+    step: 1
+    initial_value: 30
+    optimistic: true
+    restore_value: true
+    unit_of_measurement: "%"
+    icon: mdi:fan-chevron-down
+
+  - platform: template
+    name: "${gpu_name} Full Speed Temp"
+    id: ${gpu_id}_full_temp
+    min_value: 35
+    max_value: 95
+    step: 1
+    initial_value: 65
+    optimistic: true
+    restore_value: true
+    unit_of_measurement: "°C"
+    icon: mdi:thermometer-high
+
+globals:
+  - id: ${gpu_id}_last_speed
+    type: float
+    restore_value: no
+    initial_value: '0.30'
+
+# ---- Control loop: always on (no auto switch). NaN temp -> min speed. ----
+interval:
+  - interval: 5s
+    then:
+      - lambda: |-
+          float temp      = id(${gpu_id}_temp).state;
+          float target    = id(${gpu_id}_target_temp).state;
+          float full_temp = id(${gpu_id}_full_temp).state;
+          float min_speed = id(${gpu_id}_min_speed).state / 100.0f;
+          float s;
+          if (isnan(temp)) {
+            s = min_speed;                      // sensor missing/disconnected
+          } else {
+            if (full_temp <= target) full_temp = target + 5.0f;
+            if (temp <= target) {
+              s = min_speed;
+            } else if (temp >= full_temp) {
+              s = 1.0f;
+            } else {
+              float ratio = (temp - target) / (full_temp - target);
+              s = min_speed + ratio * (1.0f - min_speed);
+            }
+          }
+          id(${gpu_id}_last_speed) = s;
+          id(${gpu_id}_pwm).set_level(s);

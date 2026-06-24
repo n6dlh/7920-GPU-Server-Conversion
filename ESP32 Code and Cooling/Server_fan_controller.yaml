@@ -1,0 +1,107 @@
+esphome:
+  name: server-fan-controller
+  friendly_name: Server Fan Controller
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+
+logger:
+
+api:
+  encryption:
+    key: ""
+
+ota:
+  - platform: esphome
+    password: ""
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  ap:
+    ssid: "Server-Fan-Controller"
+    password: ""
+
+captive_portal:
+web_server:
+
+# Shared 1-Wire bus for all DS18B20 sensors
+one_wire:
+  - platform: gpio
+    pin: GPIO4
+
+# ---------------------------------------------------------------
+# One package per GPU. Add GPU 4 by copying a 6-line block.
+# ---------------------------------------------------------------
+packages:
+  gpu1: !include
+    file: gpu_bank.yaml
+    vars:
+      gpu_id: gpu1
+      gpu_name: "GPU 1"
+      pwm_pin: GPIO18
+      tach_pin: GPIO25
+      temp_address: "0x0000000000000000"
+
+  gpu2: !include
+    file: gpu_bank.yaml
+    vars:
+      gpu_id: gpu2
+      gpu_name: "GPU 2"
+      pwm_pin: GPIO19
+      tach_pin: GPIO26
+      temp_address: "0x0000000000000000"
+
+  gpu3: !include
+    file: gpu_bank.yaml
+    vars:
+      gpu_id: gpu3
+      gpu_name: "GPU 3"
+      pwm_pin: GPIO21
+      tach_pin: GPIO27
+      temp_address: "0x0000000000000000"   # TODO: paste real DS18B20 address
+
+# ---------------------------------------------------------------
+# Shared diagnostics
+# ---------------------------------------------------------------
+sensor:
+  - platform: wifi_signal
+    name: "ESP32 WiFi Signal"
+    update_interval: 30s
+    entity_category: diagnostic
+    device_class: signal_strength
+    state_class: measurement
+
+  - platform: uptime
+    name: "ESP32 Uptime"
+    update_interval: 60s
+    entity_category: diagnostic
+
+  - platform: internal_temperature
+    name: "ESP32 Internal Temperature"
+    update_interval: 30s
+    entity_category: diagnostic
+    device_class: temperature
+    state_class: measurement
+
+binary_sensor:
+  - platform: status
+    name: "GPU Fan Controller Status"
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: "ESP32 IP Address"
+      entity_category: diagnostic
+    ssid:
+      name: "ESP32 Connected SSID"
+      entity_category: diagnostic
+    mac_address:
+      name: "ESP32 MAC Address"
+      entity_category: diagnostic
+
+  - platform: version
+    name: "ESPHome Version"
+    entity_category: diagnostic
