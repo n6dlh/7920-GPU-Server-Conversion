@@ -1,14 +1,26 @@
 This code is setup for ESP Home to run on home assistant and can be vide coded to use as a standard ESP32 using IDE. 
 
 The updated code will scale up to 3 GPU, it will use the Gpu_bank.yaml to pull the information in when compiling. Use Studio Code Server on HAOS and drop the files into the ESPhome folder. You will see the new files in the ESP Home on HAOS. Use the initial flash to the ESP to copy the encryution and password information, and pull the dallas sensor addresses from the logs off the initial flash, then validate the code. 
+
 ![alt text](/ESP32%20Code%20and%20Cooling/images/logs.png)
 
 
-This has its own webpage and then integrades into HAOS, and was programmed and setup on ESPhome plugin on HAOS![alt text](/ESP32%20Code%20and%20Cooling/images/image.png)![alt text](/ESP32%20Code%20and%20Cooling/images/image-1.png)![alt text](/ESP32%20Code%20and%20Cooling/images/image-2.png)
+This has its own webpage and then integrades into HAOS, and was programmed and setup on ESPhome plugin on HAOS!
+ESP Home main page. 
+
+[alt text](/ESP32%20Code%20and%20Cooling/images/esphome.png)
+
+Fan controller added to HAOS dashboard
+
+[alt text](/ESP32%20Code%20and%20Cooling/images/HAOS.png)
+
+Diagnostics information dahboard panel
+
+[alt text](/ESP32%20Code%20and%20Cooling/images/diagnostics.png)
 
 Here is the webpage:
 
-![alt text](/ESP32%20Code%20and%20Cooling/images/image-3.png)
+![alt text](/ESP32%20Code%20and%20Cooling/images/webpage.png)
 
 The logs show in real time and can also be checked in ESPhome, supports OTA updates and programming once it is programmed over USB. 
 The Dallas sensors are single pin addressed, so that will need to be set for each fan bank. An initial base program is done to setup the ESPhome and the first part of the code
