@@ -8,15 +8,15 @@ The updated code will scale up to 3 GPU, it will use the Gpu_bank.yaml to pull t
 This has its own webpage and then integrades into HAOS, and was programmed and setup on ESPhome plugin on HAOS!
 ESP Home main page. 
 
-[alt text](/ESP32%20Code%20and%20Cooling/images/esphome.png)
+![alt text](/ESP32%20Code%20and%20Cooling/images/esphome.png)
 
 Fan controller added to HAOS dashboard
 
-[alt text](/ESP32%20Code%20and%20Cooling/images/HAOS.png)
+![alt text](/ESP32%20Code%20and%20Cooling/images/HAOS.png)
 
 Diagnostics information dahboard panel
 
-[alt text](/ESP32%20Code%20and%20Cooling/images/diagnostics.png)
+![alt text](/ESP32%20Code%20and%20Cooling/images/diagnostics.png)
 
 Here is the webpage:
 
